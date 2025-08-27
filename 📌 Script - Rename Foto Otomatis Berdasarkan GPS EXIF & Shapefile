@@ -1,0 +1,73 @@
+import os
+import time
+from shapely.geometry import Point
+import geopandas as gpd
+import exifread
+
+# === Konfigurasi path ===
+folder_foto = r"C:\Users\Photo"
+shapefile_path = r"C:\Users\Shapefile"
+log_path = os.path.join(folder_foto, "rename_log.txt")  # Path log rename
+
+# === Fungsi ambil GPS dari EXIF ===
+def get_gps_from_exif(file_path):
+    with open(file_path, 'rb') as f:
+        tags = exifread.process_file(f, details=False)
+
+    def dms_to_dd(dms_tag, ref_tag):
+        dms = dms_tag.values
+        ref = ref_tag.values
+        try:
+            deg = float(dms[0].num) / float(dms[0].den)
+            minu = float(dms[1].num) / float(dms[1].den)
+            sec = float(dms[2].num) / float(dms[2].den)
+            dd = deg + (minu / 60.0) + (sec / 3600.0)
+            if ref in ['S', 'W']:
+                dd = -dd
+            return dd
+        except Exception as e:
+            print(f"  ⚠️ Error parsing GPS: {e}")
+            return None
+
+    try:
+        lat = dms_to_dd(tags['GPS GPSLatitude'], tags['GPS GPSLatitudeRef'])
+        lon = dms_to_dd(tags['GPS GPSLongitude'], tags['GPS GPSLongitudeRef'])
+        return (lon, lat)
+    except KeyError:
+        return None
+
+# === Load shapefile ===
+gdf = gpd.read_file(shapefile_path)
+gdf = gdf.to_crs(epsg=32748)
+
+# === Buka file log untuk nulis rename ===
+with open(log_path, "w") as log_file:
+    for filename in os.listdir(folder_foto):
+        if filename.lower().endswith('.jpg'):
+            foto_path = os.path.join(folder_foto, filename)
+            gps = get_gps_from_exif(foto_path)
+
+            if gps:
+                titik_foto = Point(gps)
+                titik_foto = gpd.GeoSeries([titik_foto], crs="EPSG:4326").to_crs(gdf.crs).iloc[0]
+
+                gdf['dist'] = gdf.geometry.distance(titik_foto)
+                terdekat = gdf.loc[gdf['dist'].idxmin()]
+                nama_baru = str(terdekat.get('ALAMAT', 'foto')).strip().replace(' ', '_').replace('/', '_')
+
+                base_name = f"{nama_baru}.jpg"
+                new_path = os.path.join(folder_foto, base_name)
+
+                base, ext = os.path.splitext(base_name)
+                counter = 1
+                while os.path.exists(new_path):
+                    new_path = os.path.join(folder_foto, f"{base}_{counter}{ext}")
+                    counter += 1
+
+                os.rename(foto_path, new_path)
+                log_file.write(f"{os.path.basename(foto_path)} => {os.path.basename(new_path)}\n")
+                print(f"✅ Renamed: {filename} → {os.path.basename(new_path)}")
+            else:
+                print(f"❌ Tidak ada GPS di EXIF: {filename}")
+                
+#PROPERTY SCRIPT BELONG TO SEPTA MP
