@@ -1,0 +1,67 @@
+import os
+import csv
+from datetime import datetime
+import geopandas as gpd
+from shapely.geometry import Point
+
+# === KONFIGURASI ===
+folder_foto = r"C:\Users\Photo"   # Folder foto
+shapefile_path = r"C:\Users\Azelia\Shapefile"  # Shapefile
+kolom_nama = "Photo"   # Kolom atribut shapefile untuk rename
+log_csv = r"C:\Users\Azelia\Downloads\Update Foto\test script\Kampung Rawa\log_rename.csv"
+
+# === STEP 1: Baca Shapefile ===
+gdf = gpd.read_file(shapefile_path)
+
+# Pastikan shapefile ada kolom baru untuk menyimpan nama file hasil rename
+if "foto_baru" not in gdf.columns:
+    gdf["foto_baru"] = None
+
+# === STEP 2: Loop Foto ===
+log_data = []
+for filename in os.listdir(folder_foto):
+    if filename.lower().endswith(".jpg"):
+        foto_path = os.path.join(folder_foto, filename)
+
+        # Cari feature terdekat berdasarkan koordinat? (opsional)
+        # Disini kita anggap match berdasarkan urutan/ID, atau bisa pakai logic lain
+        row = gdf.iloc[0]  # Contoh: ambil baris pertama
+        nama_baru = str(row[kolom_nama]).strip().replace(" ", "_").replace("/", "_")
+
+        # === STEP 3: Handle duplikat otomatis ===
+        base_name = f"{nama_baru}.jpg"
+        new_path = os.path.join(folder_foto, base_name)
+        counter = 1
+        while os.path.exists(new_path):
+            new_path = os.path.join(folder_foto, f"{nama_baru}_{counter}.jpg")
+            counter += 1
+
+        # === STEP 4: Preview Mapping ===
+        print(f"PREVIEW: {filename} → {os.path.basename(new_path)}")
+
+        # === STEP 5: Eksekusi Rename ===
+        os.rename(foto_path, new_path)
+
+        # Update shapefile kolom foto_baru
+        gdf.at[0, "foto_baru"] = os.path.basename(new_path)
+
+        # === STEP 6: Log ke CSV ===
+        log_data.append([
+            filename,
+            os.path.basename(new_path),
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        ])
+
+# === SIMPAN LOG ===
+with open(log_csv, "w", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    writer.writerow(["foto_awal", "foto_baru", "timestamp"])
+    writer.writerows(log_data)
+
+# === SIMPAN SHAPEFILE UPDATE ===
+gdf.to_file(shapefile_path)
+
+print("✅ Semua foto berhasil di-rename dan log tersimpan!")
+
+
+#PROPERTY SCRIPT BELONG TO SEPTA MP
