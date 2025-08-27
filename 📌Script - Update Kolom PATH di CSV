@@ -1,0 +1,19 @@
+import pandas as pd
+import os
+
+# Buka CSV (PASTIKAN PATH DITUTUP DENGAN ")
+csv_path = r"C:\Users\path.csv"  # <-- TAMBAHKAN " DI AKHIR
+df = pd.read_csv(csv_path)
+
+# Folder tempat semua gambar disimpan (TAMBAHKAN " DI AKHIR)
+folder_gambar = r"C:\Users\path photo"  # <-- TAMBAHKAN " DI AKHIR
+
+# Update kolom PATH jadi full path dari folder yang benar
+df['PATH'] = df['PATH'].apply(lambda x: os.path.join(folder_gambar, os.path.basename(x)))
+
+# Simpan ulang CSV yang udah diperbaiki
+df.to_csv(csv_path, index=False)
+
+print("✅ PATH di CSV berhasil diperbarui!")
+
+#PROPERTY SCRIPT BELONG TO SEPTA MP
