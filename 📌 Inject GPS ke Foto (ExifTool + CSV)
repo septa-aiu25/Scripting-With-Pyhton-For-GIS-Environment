@@ -1,0 +1,43 @@
+```
+import pandas as pd
+import subprocess
+import os
+
+# Path ke exiftool
+exiftool_path = r"C:\Users\Azelia\Downloads\Script Photo\exiftool-13.30_64\exiftool.exe"
+
+# Baca CSV
+csv_path = r"C:\Users\Path.csv"
+df = pd.read_csv(csv_path)
+
+# Folder tempat foto disimpan (sesuaikan dengan lokasi sebenarnya)
+folder_foto = r"C:\Users\Photo" # <-- Ganti dengan folder foto kamu
+
+# Perbaiki path foto dengan menggabungkan folder + nama file
+df["PATH"] = df["PATH"].apply(lambda x: os.path.join(folder_foto, os.path.basename(x)))
+
+# Loop untuk tulis GPS
+for index, row in df.iterrows():
+    image_path = row["PATH"]
+    lat = row["LATITUDE"]
+    lon = row["LONGITUDE"]
+
+    if os.path.exists(image_path):
+        command = [
+            exiftool_path,
+            f"-GPSLatitude={abs(lat)}",
+            f"-GPSLatitudeRef={'N' if lat >= 0 else 'S'}",
+            f"-GPSLongitude={abs(lon)}",
+            f"-GPSLongitudeRef={'E' if lon >= 0 else 'W'}",
+            "-overwrite_original",
+            image_path
+        ]
+        try:
+            subprocess.run(command, check=True)
+            print(f"✅ GPS ditulis ke: {image_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"❌ Gagal menulis GPS ke {image_path}: {e}")
+    else:
+        print(f"❌ File tidak ditemukan: {image_path}")
+```
+#PROPERTY SCRIPT BELONG TO SEPTA MP
