@@ -7,12 +7,14 @@ Script ini dikembangkan untuk mempermudah sinkronisasi data spasial dan memastik
 
 ## 📌 Daftar Script  
 
-### 1. Update Kolom PATH di CSV  
-- **Fungsi**: Mengupdate kolom `PATH` di file CSV agar sesuai dengan lokasi direktori foto terbaru.  
-- **Kasus penggunaan**: Folder foto dipindahkan, script ini otomatis menyesuaikan path di CSV tanpa input manual.  
+### 1. Inject GPS ke Metadata Foto Menggunakan ExifTool  
+- **Fungsi**: Alternatif yang lebih cepat dan stabil untuk menulis koordinat GPS ke metadata foto.  
+- **Cara kerja**: Menggunakan `subprocess` untuk memanggil **ExifTool** langsung dari Python.  
+- **Fitur**: Mendukung format `N/S` untuk latitude dan `E/W` untuk longitude.  
+- **Kelebihan**: Lebih powerful dan minim error dibanding manipulasi manual metadata.
 
 ---
-
+  
 ### 2. Rename Foto Berdasarkan Atribut Shapefile  
 - **Fungsi**: Melakukan *batch renaming* foto berdasarkan kolom atribut shapefile (misalnya `Photo`).  
 - **Fitur tambahan**: Menangani duplikasi nama file dengan menambahkan suffix otomatis (`_1`, `_2`, dst.).  
@@ -33,13 +35,12 @@ Script ini dikembangkan untuk mempermudah sinkronisasi data spasial dan memastik
 
 ---
 
-### 5. Inject GPS ke Metadata Foto Menggunakan ExifTool  
-- **Fungsi**: Alternatif yang lebih cepat dan stabil untuk menulis koordinat GPS ke metadata foto.  
-- **Cara kerja**: Menggunakan `subprocess` untuk memanggil **ExifTool** langsung dari Python.  
-- **Fitur**: Mendukung format `N/S` untuk latitude dan `E/W` untuk longitude.  
-- **Kelebihan**: Lebih powerful dan minim error dibanding manipulasi manual metadata.  
+### 5. Update Kolom PATH di CSV  
+- **Fungsi**: Mengupdate kolom `PATH` di file CSV agar sesuai dengan lokasi direktori foto terbaru.  
+- **Kasus penggunaan**: Folder foto dipindahkan, script ini otomatis menyesuaikan path di CSV tanpa input manual.  
 
 ---
+
 
 ## ⚡ Manfaat ## 
 Dengan script-script ini, pekerjaan repetitif dalam GIS dapat diotomatisasi sehingga:  
