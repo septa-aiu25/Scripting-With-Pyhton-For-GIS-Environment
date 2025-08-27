@@ -3,9 +3,8 @@
 Kumpulan script Python untuk mendukung pekerjaan di bidang **Geospatial Information System (GIS)**, khususnya dalam **otomatisasi manajemen foto, metadata, CSV, dan shapefile**.  
 Script ini dikembangkan untuk mempermudah sinkronisasi data spasial dan memastikan konsistensi antara atribut, foto lapangan, serta database.  
 
----
-
 ## 📌 Daftar Script  
+---
 
 ### 1. Inject GPS ke Metadata Foto Menggunakan ExifTool  
 - **Fungsi**: Alternatif yang lebih cepat dan stabil untuk menulis koordinat GPS ke metadata foto.  
